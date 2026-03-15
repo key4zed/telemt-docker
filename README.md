@@ -1,5 +1,15 @@
 # 🐳 telemt-docker
 
+> **📢 Сборка образов перенесена в GitLab**
+>
+> Из-за перманентной блокировки GitHub Actions образы теперь собираются в
+> **[GitLab CI](https://gitlab.com/An0nX/telemt-docker)**. GitHub-репозиторий
+> продолжает существовать как зеркало GitLab.
+>
+> Подробности: [An0nX/telemt-docker#14](https://github.com/An0nX/telemt-docker/issues/14)
+
+---
+
 ![Docker Image Size](https://img.shields.io/docker/image-size/whn0thacked/telemt-docker/latest?style=flat-square&logo=docker&color=blue)
 [![Docker Pulls](https://img.shields.io/docker/pulls/whn0thacked/telemt-docker?style=flat-square&logo=docker)](https://hub.docker.com/r/whn0thacked/telemt-docker)
 [![Architecture](https://img.shields.io/badge/arch-amd64%20%7C%20arm64-important?style=flat-square)](#)
