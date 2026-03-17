@@ -72,12 +72,22 @@ Place your configuration file as `./telemt.toml`.
 > to `127.0.0.1`), remove `network_mode: host` to use the default **bridge** mode
 > and uncomment the `ports` section below.
 
+> **⚠️ Privileged Ports (443) Binding Note:**
+> The base image uses a non-root user by default. If your configuration binds Telemt to port `443` (or any port < 1024), you will encounter a `Permission denied (os error 13)` error. To fix this, the container must be run as `root` and the `no-new-privileges` security option must be disabled. This is already reflected in the `docker-compose.yml` example below.
+
 ```yaml
 services:
   telemt:
     image: whn0thacked/telemt-docker:latest
     container_name: telemt
     restart: unless-stopped
+
+    # ---------------------------------------------------------------
+    # Root user requirement for binding privileged ports (<1024)
+    # The default image runs as 'nonroot'. We override it to 'root'
+    # to successfully bind to port 443 without os error 13.
+    # ---------------------------------------------------------------
+    user: "root"
 
     # Telemt uses RUST_LOG for verbosity (optional)
     environment:
@@ -103,8 +113,12 @@ services:
     #   # - "127.0.0.1:9090:9090/tcp"
 
     # Hardening
-    security_opt:
-      - no-new-privileges:true
+    # ---------------------------------------------------------------
+    # ⚠️ 'no-new-privileges:true' is commented out because it prevents
+    # binding to port 443 even when running as root. 
+    # ---------------------------------------------------------------
+    # security_opt:
+    #   - no-new-privileges:true
     cap_drop:
       - ALL
     cap_add:
