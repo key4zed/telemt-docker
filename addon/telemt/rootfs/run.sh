@@ -79,6 +79,6 @@ export RUST_LOG="$LOG_LEVEL"
 if telemt --help 2>&1 | grep -q -- "--config"; then
     exec telemt --config "$CONFIG_PATH"
 else
-    # Fallback to positional argument
-    exec telemt "$CONFIG_PATH"
+    # Fallback to positional argument with data-path to influence explicit config location
+    exec telemt --data-path /config "$CONFIG_PATH"
 fi
