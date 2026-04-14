@@ -44,6 +44,9 @@ enabled = $ENABLE_API
 port = 9091
 EOF
 
+# Create symlink in /etc for telemt (if it tries to read from /etc/telemt.toml)
+ln -sf "$CONFIG_PATH" /etc/telemt.toml 2>/dev/null || bashio::log.warning "Could not create symlink in /etc, but continuing..."
+
 bashio::log.info "Configuration written to $CONFIG_PATH"
 bashio::log.info "Starting Telemt..."
 
