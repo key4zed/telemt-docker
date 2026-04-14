@@ -2,9 +2,13 @@
 
 set -e
 
-CONFIG_PATH=/data/telemt.toml
+CONFIG_PATH=/config/telemt.toml
 
 bashio::log.info "Generating Telemt configuration..."
+
+# Ensure config directory exists
+mkdir -p /config
+chmod 755 /config
 
 # Read options
 SECRET=$(bashio::config 'secret')
