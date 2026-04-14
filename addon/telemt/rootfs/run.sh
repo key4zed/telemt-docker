@@ -64,28 +64,28 @@ if [[ ! -d /etc/telemt ]]; then
     mkdir -p /etc/telemt 2>/dev/null && chmod 777 /etc/telemt || bashio::log.warning "Cannot create /etc/telemt"
 fi
 
-# Ensure /etc/telemt.toml is a symlink to our config (force)
-if [[ -L /etc/telemt.toml ]]; then
-    bashio::log.info "/etc/telemt.toml is a symlink, removing..."
-    rm -f /etc/telemt.toml
+# Ensure /etc/telemt/telemt.toml is a symlink to our config (force)
+if [[ -L /etc/telemt/telemt.toml ]]; then
+    bashio::log.info "/etc/telemt/telemt.toml is a symlink, removing..."
+    rm -f /etc/telemt/telemt.toml
 fi
-ln -sf "$CONFIG_PATH" /etc/telemt.toml 2>/dev/null || {
-    bashio::log.warning "Symlink failed, copying config to /etc/telemt.toml"
-    cp "$CONFIG_PATH" /etc/telemt.toml 2>/dev/null || {
-        bashio::log.error "Cannot write to /etc/telemt.toml, trying to create empty file with chmod..."
-        touch /etc/telemt.toml 2>/dev/null && chmod 666 /etc/telemt.toml
+ln -sf "$CONFIG_PATH" /etc/telemt/telemt.toml 2>/dev/null || {
+    bashio::log.warning "Symlink failed, copying config to /etc/telemt/telemt.toml"
+    cp "$CONFIG_PATH" /etc/telemt/telemt.toml 2>/dev/null || {
+        bashio::log.error "Cannot write to /etc/telemt/telemt.toml, trying to create empty file with chmod..."
+        touch /etc/telemt/telemt.toml 2>/dev/null && chmod 666 /etc/telemt/telemt.toml
     }
 }
 
-bashio::log.info "Created symlink /etc/telemt.toml -> $CONFIG_PATH"
+bashio::log.info "Created symlink /etc/telemt/telemt.toml -> $CONFIG_PATH"
 
 # Verify write access
-if [[ -w /etc/telemt.toml ]]; then
-    bashio::log.info "/etc/telemt.toml is writable"
+if [[ -w /etc/telemt/telemt.toml ]]; then
+    bashio::log.info "/etc/telemt/telemt.toml is writable"
 else
-    bashio::log.warning "/etc/telemt.toml is not writable, explicit config may fail"
+    bashio::log.warning "/etc/telemt/telemt.toml is not writable, explicit config may fail"
     # Attempt to change permissions
-    chmod 666 /etc/telemt.toml 2>/dev/null || true
+    chmod 666 /etc/telemt/telemt.toml 2>/dev/null || true
 fi
 
 bashio::log.info "Starting Telemt..."
@@ -96,5 +96,5 @@ export RUST_LOG="$LOG_LEVEL"
 export TELEMT_EXPLICIT_CONFIG=0
 export TELEMT_NO_EXPLICIT_CONFIG=1
 
-# Run telemt with data-path to influence explicit config location
-exec telemt --data-path /config "$CONFIG_PATH"
+# Run telemt with data-path to influence explicit config location, using the symlink path
+exec telemt --data-path /config /etc/telemt/telemt.toml
