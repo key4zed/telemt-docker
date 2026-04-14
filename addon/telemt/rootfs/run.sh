@@ -25,6 +25,12 @@ fi
 bashio::log.info "Creating symlink /etc/telemt.toml -> $CONFIG_PATH"
 ln -sf "$CONFIG_PATH" /etc/telemt.toml 2>/dev/null || bashio::log.warning "Cannot create symlink"
 
+# Also create the actual file at /etc/telemt.toml with proper permissions (in case telemt tries to write)
+bashio::log.info "Ensuring /etc/telemt.toml is writable..."
+touch /etc/telemt.toml 2>/dev/null || true
+chmod 666 /etc/telemt.toml 2>/dev/null || true
+bashio::log.info "Debug: /etc/telemt.toml permissions: $(ls -l /etc/telemt.toml 2>/dev/null || echo 'missing')"
+
 # Read options
 SECRET=$(bashio::config 'secret')
 PORT=$(bashio::config 'port')
