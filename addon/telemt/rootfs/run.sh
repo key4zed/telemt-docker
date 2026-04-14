@@ -49,7 +49,7 @@ bashio::log.info "Configuration written to $CONFIG_PATH"
 # Debug: check permissions and user
 bashio::log.info "Debug: running as user $(whoami)"
 bashio::log.info "Debug: /etc permissions: $(ls -ld /etc)"
-bashio::log.info "Debug: /etc/telemt.toml exists? $(ls -l /etc/telemt.toml 2>/dev/null || echo 'no')"
+bashio::log.info "Debug: /etc/telemt/telemt.toml exists? $(ls -l /etc/telemt/telemt.toml 2>/dev/null || echo 'no')"
 bashio::log.info "Debug: /etc mount info: $(mount | grep ' /etc ' || echo 'not found')"
 
 # Check if /etc is read-only
@@ -64,28 +64,33 @@ if [[ ! -d /etc/telemt ]]; then
     mkdir -p /etc/telemt 2>/dev/null && chmod 777 /etc/telemt || bashio::log.warning "Cannot create /etc/telemt"
 fi
 
-# Ensure /etc/telemt/telemt.toml is a symlink to our config (force)
-if [[ -L /etc/telemt/telemt.toml ]]; then
-    bashio::log.info "/etc/telemt/telemt.toml is a symlink, removing..."
-    rm -f /etc/telemt/telemt.toml
-fi
-ln -sf "$CONFIG_PATH" /etc/telemt/telemt.toml 2>/dev/null || {
-    bashio::log.warning "Symlink failed, copying config to /etc/telemt/telemt.toml"
-    cp "$CONFIG_PATH" /etc/telemt/telemt.toml 2>/dev/null || {
-        bashio::log.error "Cannot write to /etc/telemt/telemt.toml, trying to create empty file with chmod..."
-        touch /etc/telemt/telemt.toml 2>/dev/null && chmod 666 /etc/telemt/telemt.toml
-    }
+# Copy config to both paths (not symlinks) to ensure telemt can write explicit config
+bashio::log.info "Copying config to /etc/telemt.toml and /etc/telemt/telemt.toml"
+cp "$CONFIG_PATH" /etc/telemt.toml 2>/dev/null || {
+    bashio::log.error "Failed to copy to /etc/telemt.toml, trying to create empty file..."
+    touch /etc/telemt.toml 2>/dev/null && chmod 666 /etc/telemt.toml
+}
+cp "$CONFIG_PATH" /etc/telemt/telemt.toml 2>/dev/null || {
+    bashio::log.error "Failed to copy to /etc/telemt/telemt.toml, trying to create empty file..."
+    touch /etc/telemt/telemt.toml 2>/dev/null && chmod 666 /etc/telemt/telemt.toml
 }
 
-bashio::log.info "Created symlink /etc/telemt/telemt.toml -> $CONFIG_PATH"
+# Ensure both files are writable
+chmod 666 /etc/telemt.toml 2>/dev/null || true
+chmod 666 /etc/telemt/telemt.toml 2>/dev/null || true
+
+bashio::log.info "Config copied, both paths ready"
 
 # Verify write access
+if [[ -w /etc/telemt.toml ]]; then
+    bashio::log.info "/etc/telemt.toml is writable"
+else
+    bashio::log.warning "/etc/telemt.toml is not writable, explicit config may fail"
+fi
 if [[ -w /etc/telemt/telemt.toml ]]; then
     bashio::log.info "/etc/telemt/telemt.toml is writable"
 else
-    bashio::log.warning "/etc/telemt/telemt.toml is not writable, explicit config may fail"
-    # Attempt to change permissions
-    chmod 666 /etc/telemt/telemt.toml 2>/dev/null || true
+    bashio::log.warning "/etc/telemt/telemt.toml is not writable"
 fi
 
 bashio::log.info "Starting Telemt..."
@@ -96,5 +101,5 @@ export RUST_LOG="$LOG_LEVEL"
 export TELEMT_EXPLICIT_CONFIG=0
 export TELEMT_NO_EXPLICIT_CONFIG=1
 
-# Run telemt with data-path to influence explicit config location, using the symlink path
-exec telemt --data-path /config /etc/telemt/telemt.toml
+# Run telemt with the configuration file path (as per official Docker image)
+exec telemt /etc/telemt/telemt.toml

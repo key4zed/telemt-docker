@@ -57,4 +57,4 @@ EXPOSE 443/tcp 9090/tcp
 
 USER nonroot:nonroot
 ENTRYPOINT ["/usr/local/bin/telemt"]
-CMD ["/etc/telemt.toml"]
+CMD ["/etc/telemt/telemt.toml"]
