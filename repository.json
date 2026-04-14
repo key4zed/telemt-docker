@@ -8,7 +8,7 @@
       "slug": "telemt",
       "description": "Fast MTProto proxy server (MTProxy) written in Rust",
       "version": "1.0.0",
-      "arch": ["amd64", "arm64"]
+      "arch": ["amd64", "aarch64"]
     }
   ]
 }

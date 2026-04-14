@@ -4,7 +4,7 @@ slug: "telemt"
 description: "Fast MTProto proxy server (MTProxy) written in Rust"
 arch:
   - amd64
-  - arm64
+  - aarch64
 startup: "application"
 boot: "auto"
 host_network: true
