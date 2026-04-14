@@ -1,0 +1,50 @@
+#!/usr/bin/env bashio
+
+set -e
+
+CONFIG_PATH=/data/telemt.toml
+
+bashio::log.info "Generating Telemt configuration..."
+
+# Read options
+SECRET=$(bashio::config 'secret')
+PORT=$(bashio::config 'port')
+ENABLE_METRICS=$(bashio::config 'enable_metrics')
+ENABLE_API=$(bashio::config 'enable_api')
+LOG_LEVEL=$(bashio::config 'log_level')
+NETWORK_MODE=$(bashio::config 'network_mode')
+
+# Validate secret
+if [[ -z "$SECRET" ]]; then
+    bashio::log.error "Secret is required! Please set a 32-character hex secret in addon configuration."
+    exit 1
+fi
+
+if [[ ! "$SECRET" =~ ^[a-fA-F0-9]{32}$ ]]; then
+    bashio::log.error "Invalid secret format. Must be 32 hex characters."
+    exit 1
+fi
+
+# Generate telemt.toml
+cat > "$CONFIG_PATH" <<EOF
+secret = "$SECRET"
+port = $PORT
+log_level = "$LOG_LEVEL"
+
+[metrics]
+enabled = $ENABLE_METRICS
+port = 9090
+
+[api]
+enabled = $ENABLE_API
+port = 9091
+EOF
+
+bashio::log.info "Configuration written to $CONFIG_PATH"
+bashio::log.info "Starting Telemt..."
+
+# Export RUST_LOG if set
+export RUST_LOG="$LOG_LEVEL"
+
+# Run telemt with the config file
+exec telemt "$CONFIG_PATH"

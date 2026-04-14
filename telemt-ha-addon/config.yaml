@@ -1,0 +1,42 @@
+name: "Telemt MTProxy"
+version: "1.0.0"
+slug: "telemt"
+description: "Fast MTProto proxy server (MTProxy) written in Rust"
+arch:
+  - amd64
+  - arm64
+startup: "application"
+boot: "auto"
+host_network: true
+host_dbus: false
+privileged:
+  - NET_ADMIN
+  - SYS_ADMIN
+map:
+  - config:rw
+  - ssl:rw
+ports:
+  "443/tcp": 443
+  "9090/tcp": 9090
+  "9091/tcp": 9091
+ports_description:
+  "443/tcp": "MTProxy listener"
+  "9090/tcp": "Metrics endpoint"
+  "9091/tcp": "API endpoint"
+options:
+  secret: ""
+  port: 443
+  enable_metrics: true
+  enable_api: true
+  log_level: "info"
+  network_mode: "host"
+schema:
+  secret: "str"
+  port: "int"
+  enable_metrics: "bool"
+  enable_api: "bool"
+  log_level: "list(info|debug|warn|error|trace)"
+  network_mode: "list(host|bridge)"
+image: "whn0thacked/telemt-docker"
+logo: "logo.png"
+icon: "icon.png"

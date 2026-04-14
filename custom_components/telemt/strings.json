@@ -1,0 +1,24 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configure Telemt",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "secret": "Secret (32 hex characters)",
+          "metrics_port": "Metrics port",
+          "api_port": "API port"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to Telemt API",
+      "invalid_secret_format": "Secret must be 32 hex characters",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "Telemt is already configured"
+    }
+  }
+}

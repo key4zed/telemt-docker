@@ -1,0 +1,26 @@
+# Telemt services
+restart:
+  name: Restart
+  description: Restart the Telemt proxy.
+  fields: {}
+
+reload_config:
+  name: Reload config
+  description: Reload Telemt configuration from disk.
+  fields: {}
+
+generate_secret:
+  name: Generate secret
+  description: Generate a new 32‑character hex secret for Telemt.
+  fields:
+    length:
+      name: Length
+      description: Secret length in bytes (default 16).
+      required: false
+      default: 16
+      selector:
+        number:
+          min: 8
+          max: 64
+          step: 1
+          mode: box
