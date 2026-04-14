@@ -20,6 +20,12 @@ if [[ ! -d /etc/telemt ]]; then
     bashio::log.info "Creating /etc/telemt directory..."
     mkdir -p /etc/telemt 2>/dev/null || bashio::log.warning "Cannot create /etc/telemt"
 fi
+# Ensure it's writable
+chmod 777 /etc/telemt 2>/dev/null || true
+# Create beobachten.txt file with write permissions
+touch /etc/telemt/beobachten.txt 2>/dev/null || true
+chmod 666 /etc/telemt/beobachten.txt 2>/dev/null || true
+bashio::log.info "Debug: /etc/telemt permissions: $(ls -ld /etc/telemt)"
 
 # Create symlink /etc/telemt.toml -> /run/telemt/config.toml to satisfy telemt's explicit config
 bashio::log.info "Creating symlink /etc/telemt.toml -> $CONFIG_PATH"
