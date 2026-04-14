@@ -105,7 +105,7 @@
 ### Структура проекта
 ```
 telemt-docker/
-├── telemt-ha-addon/          # Аддон Home Assistant
+├── addon/telemt/             # Аддон Home Assistant
 │   ├── config.yaml
 │   ├── build.json
 │   ├── rootfs/run.sh
@@ -122,12 +122,13 @@ telemt-docker/
 │   ├── binary_sensor.py
 │   ├── services.yaml
 │   └── strings.json
+├── repository.json           # Метаданные репозитория аддонов
 └── plans/telemt_ha_addon_tz.md  # Техническое задание
 ```
 
 ### Сборка аддона локально
 ```bash
-cd telemt-ha-addon
+cd addon/telemt
 docker build -t telemt-ha-addon .
 ```
 

@@ -37,7 +37,7 @@ If you choose a port below 1024 (e.g., 443) and the add‑on fails with `Permiss
 
 ## Volumes
 
-The add‑on stores its configuration in `/data/telemt.toml` inside the container. This file is generated from the UI options and persists across restarts.
+The add‑on stores its configuration in `/config/telemt.toml` inside the container. This file is generated from the UI options and persists across restarts.
 
 ## Logs
 

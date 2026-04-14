@@ -17,6 +17,9 @@ privileged:
 map:
   - config:rw
   - ssl:rw
+  - etc:rw
+tmpfs:
+  - /etc
 ports:
   "443/tcp": 443
   "9090/tcp": 9090

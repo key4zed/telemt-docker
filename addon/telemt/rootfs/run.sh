@@ -58,17 +58,26 @@ if grep -q ' /etc .*ro,' /proc/mounts 2>/dev/null; then
     mount -o remount,rw /etc 2>/dev/null || bashio::log.error "Remount failed"
 fi
 
-# Ensure /etc/telemt.toml exists and is writable
-if [[ ! -e /etc/telemt.toml ]]; then
-    bashio::log.info "Creating /etc/telemt.toml symlink..."
-    ln -sf "$CONFIG_PATH" /etc/telemt.toml 2>/dev/null || {
-        bashio::log.warning "Symlink failed, copying config to /etc/telemt.toml"
-        cp "$CONFIG_PATH" /etc/telemt.toml 2>/dev/null || {
-            bashio::log.error "Cannot write to /etc/telemt.toml, trying to create empty file with chmod..."
-            touch /etc/telemt.toml 2>/dev/null && chmod 666 /etc/telemt.toml
-        }
-    }
+# Ensure /etc/telemt directory exists (telemt may try to create it)
+if [[ ! -d /etc/telemt ]]; then
+    bashio::log.info "Creating /etc/telemt directory..."
+    mkdir -p /etc/telemt 2>/dev/null && chmod 777 /etc/telemt || bashio::log.warning "Cannot create /etc/telemt"
 fi
+
+# Ensure /etc/telemt.toml is a symlink to our config (force)
+if [[ -L /etc/telemt.toml ]]; then
+    bashio::log.info "/etc/telemt.toml is a symlink, removing..."
+    rm -f /etc/telemt.toml
+fi
+ln -sf "$CONFIG_PATH" /etc/telemt.toml 2>/dev/null || {
+    bashio::log.warning "Symlink failed, copying config to /etc/telemt.toml"
+    cp "$CONFIG_PATH" /etc/telemt.toml 2>/dev/null || {
+        bashio::log.error "Cannot write to /etc/telemt.toml, trying to create empty file with chmod..."
+        touch /etc/telemt.toml 2>/dev/null && chmod 666 /etc/telemt.toml
+    }
+}
+
+bashio::log.info "Created symlink /etc/telemt.toml -> $CONFIG_PATH"
 
 # Verify write access
 if [[ -w /etc/telemt.toml ]]; then
@@ -83,11 +92,9 @@ bashio::log.info "Starting Telemt..."
 
 # Export RUST_LOG if set
 export RUST_LOG="$LOG_LEVEL"
+# Attempt to disable explicit config creation via environment variables
+export TELEMT_EXPLICIT_CONFIG=0
+export TELEMT_NO_EXPLICIT_CONFIG=1
 
-# Try to run telemt with explicit config flag
-if telemt --help 2>&1 | grep -q -- "--config"; then
-    exec telemt --config "$CONFIG_PATH"
-else
-    # Fallback to positional argument with data-path to influence explicit config location
-    exec telemt --data-path /config "$CONFIG_PATH"
-fi
+# Run telemt with data-path to influence explicit config location
+exec telemt --data-path /config "$CONFIG_PATH"
