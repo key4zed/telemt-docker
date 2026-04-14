@@ -1,5 +1,14 @@
 {
   "name": "Telemt Docker Add-ons",
   "url": "https://github.com/key4zed/telemt-docker",
-  "maintainer": "key4zed <key4zed@github.com>"
+  "maintainer": "key4zed <key4zed@github.com>",
+  "addons": [
+    {
+      "name": "Telemt MTProxy",
+      "slug": "telemt",
+      "description": "Fast MTProto proxy server (MTProxy) written in Rust",
+      "version": "1.0.0",
+      "arch": ["amd64", "aarch64"]
+    }
+  ]
 }
