@@ -44,10 +44,32 @@ enabled = $ENABLE_API
 port = 9091
 EOF
 
-# Try to create symlink in /etc (may fail due to permissions)
-ln -sf "$CONFIG_PATH" /etc/telemt.toml 2>/dev/null || bashio::log.warning "Could not create symlink in /etc, but continuing..."
-
 bashio::log.info "Configuration written to $CONFIG_PATH"
+
+# Debug: check permissions and user
+bashio::log.info "Debug: running as user $(whoami)"
+bashio::log.info "Debug: /etc permissions: $(ls -ld /etc)"
+bashio::log.info "Debug: /etc/telemt.toml exists? $(ls -l /etc/telemt.toml 2>/dev/null || echo 'no')"
+
+# Ensure /etc/telemt.toml exists and is writable
+if [[ ! -e /etc/telemt.toml ]]; then
+    bashio::log.info "Creating /etc/telemt.toml symlink..."
+    ln -sf "$CONFIG_PATH" /etc/telemt.toml 2>/dev/null || {
+        bashio::log.warning "Symlink failed, copying config to /etc/telemt.toml"
+        cp "$CONFIG_PATH" /etc/telemt.toml 2>/dev/null || {
+            bashio::log.error "Cannot write to /etc/telemt.toml, checking permissions..."
+            touch /etc/telemt.toml 2>/dev/null && rm -f /etc/telemt.toml
+        }
+    }
+fi
+
+# Verify write access
+if [[ -w /etc/telemt.toml ]]; then
+    bashio::log.info "/etc/telemt.toml is writable"
+else
+    bashio::log.warning "/etc/telemt.toml is not writable, explicit config may fail"
+fi
+
 bashio::log.info "Starting Telemt..."
 
 # Export RUST_LOG if set
