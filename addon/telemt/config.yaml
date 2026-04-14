@@ -1,5 +1,5 @@
 name: "Telemt MTProxy"
-version: "1.0.0"
+version: "3.3.39"
 slug: "telemt"
 description: "Fast MTProto proxy server (MTProxy) written in Rust"
 arch:
@@ -38,6 +38,6 @@ schema:
   enable_api: "bool"
   log_level: "list(info|debug|warn|error|trace)"
   network_mode: "list(host|bridge)"
-image: "whn0thacked/telemt-docker:latest"
+image: "whn0thacked/telemt-docker"
 logo: "logo.png"
 icon: "icon.png"
