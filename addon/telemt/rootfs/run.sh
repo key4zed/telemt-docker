@@ -50,6 +50,13 @@ bashio::log.info "Configuration written to $CONFIG_PATH"
 bashio::log.info "Debug: running as user $(whoami)"
 bashio::log.info "Debug: /etc permissions: $(ls -ld /etc)"
 bashio::log.info "Debug: /etc/telemt.toml exists? $(ls -l /etc/telemt.toml 2>/dev/null || echo 'no')"
+bashio::log.info "Debug: /etc mount info: $(mount | grep ' /etc ' || echo 'not found')"
+
+# Check if /etc is read-only
+if grep -q ' /etc .*ro,' /proc/mounts 2>/dev/null; then
+    bashio::log.warning "/etc is mounted read-only, attempting to remount rw..."
+    mount -o remount,rw /etc 2>/dev/null || bashio::log.error "Remount failed"
+fi
 
 # Ensure /etc/telemt.toml exists and is writable
 if [[ ! -e /etc/telemt.toml ]]; then
@@ -57,8 +64,8 @@ if [[ ! -e /etc/telemt.toml ]]; then
     ln -sf "$CONFIG_PATH" /etc/telemt.toml 2>/dev/null || {
         bashio::log.warning "Symlink failed, copying config to /etc/telemt.toml"
         cp "$CONFIG_PATH" /etc/telemt.toml 2>/dev/null || {
-            bashio::log.error "Cannot write to /etc/telemt.toml, checking permissions..."
-            touch /etc/telemt.toml 2>/dev/null && rm -f /etc/telemt.toml
+            bashio::log.error "Cannot write to /etc/telemt.toml, trying to create empty file with chmod..."
+            touch /etc/telemt.toml 2>/dev/null && chmod 666 /etc/telemt.toml
         }
     }
 fi
@@ -68,6 +75,8 @@ if [[ -w /etc/telemt.toml ]]; then
     bashio::log.info "/etc/telemt.toml is writable"
 else
     bashio::log.warning "/etc/telemt.toml is not writable, explicit config may fail"
+    # Attempt to change permissions
+    chmod 666 /etc/telemt.toml 2>/dev/null || true
 fi
 
 bashio::log.info "Starting Telemt..."
