@@ -15,6 +15,16 @@ fi
 # Ensure it's writable
 chmod 1777 /run/telemt 2>/dev/null || true
 
+# Create /etc/telemt directory (tmpfs on /etc should allow writing)
+if [[ ! -d /etc/telemt ]]; then
+    bashio::log.info "Creating /etc/telemt directory..."
+    mkdir -p /etc/telemt 2>/dev/null || bashio::log.warning "Cannot create /etc/telemt"
+fi
+
+# Create symlink /etc/telemt.toml -> /run/telemt/config.toml to satisfy telemt's explicit config
+bashio::log.info "Creating symlink /etc/telemt.toml -> $CONFIG_PATH"
+ln -sf "$CONFIG_PATH" /etc/telemt.toml 2>/dev/null || bashio::log.warning "Cannot create symlink"
+
 # Read options
 SECRET=$(bashio::config 'secret')
 PORT=$(bashio::config 'port')
