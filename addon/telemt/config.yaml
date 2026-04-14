@@ -17,7 +17,6 @@ privileged:
 map:
   - config:rw
   - ssl:rw
-  - etc:rw
 tmpfs:
   - /etc
 ports:
