@@ -25,7 +25,7 @@ tmpfs:
   - /etc
   - /run/telemt:rw,mode=1777,size=1m
 ports:
-  "4443/tcp": 4443
+  "4443/tcp": 8443
   "9090/tcp": 9090
   "9091/tcp": 9091
 ports_description:
@@ -34,7 +34,7 @@ ports_description:
   "9091/tcp": "API endpoint"
 options:
   secret: ""
-  port: 4443
+  port: 8443
   enable_metrics: true
   enable_api: true
   log_level: "info"
@@ -46,6 +46,6 @@ schema:
   enable_api: "bool"
   log_level: "list(info|debug|warn|error|trace)"
   network_mode: "list(host|bridge)"
-image: "whn0thacked/telemt-docker"
+image: "ghcr.io/telemt/telemt"
 logo: "logo.png"
 icon: "icon.png"
