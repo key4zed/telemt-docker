@@ -44,7 +44,7 @@ enabled = $ENABLE_API
 port = 9091
 EOF
 
-# Create symlink in /etc for telemt (if it tries to read from /etc/telemt.toml)
+# Try to create symlink in /etc (may fail due to permissions)
 ln -sf "$CONFIG_PATH" /etc/telemt.toml 2>/dev/null || bashio::log.warning "Could not create symlink in /etc, but continuing..."
 
 bashio::log.info "Configuration written to $CONFIG_PATH"
@@ -53,5 +53,10 @@ bashio::log.info "Starting Telemt..."
 # Export RUST_LOG if set
 export RUST_LOG="$LOG_LEVEL"
 
-# Run telemt with the config file
-exec telemt "$CONFIG_PATH"
+# Try to run telemt with explicit config flag
+if telemt --help 2>&1 | grep -q -- "--config"; then
+    exec telemt --config "$CONFIG_PATH"
+else
+    # Fallback to positional argument
+    exec telemt "$CONFIG_PATH"
+fi
