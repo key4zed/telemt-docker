@@ -9,16 +9,21 @@ startup: "application"
 boot: "auto"
 init: false
 user: root
-host_network: true
+host_network: false
 host_dbus: false
-privileged:
-  - NET_ADMIN
-  - SYS_ADMIN
+cap_drop:
+  - ALL
+cap_add:
+  - NET_BIND_SERVICE
+read_only: true
+security_opt:
+  - no-new-privileges:true
 map:
   - config:rw
   - ssl:rw
 tmpfs:
   - /etc
+  - /run/telemt:rw,mode=1777,size=1m
 ports:
   "443/tcp": 443
   "9090/tcp": 9090
@@ -33,7 +38,7 @@ options:
   enable_metrics: true
   enable_api: true
   log_level: "info"
-  network_mode: "host"
+  network_mode: "bridge"
 schema:
   secret: "str"
   port: "int"
@@ -41,6 +46,6 @@ schema:
   enable_api: "bool"
   log_level: "list(info|debug|warn|error|trace)"
   network_mode: "list(host|bridge)"
-image: "whn0thacked/telemt-docker"
+image: "ghcr.io/telemt/telemt"
 logo: "logo.png"
 icon: "icon.png"

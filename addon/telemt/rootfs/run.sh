@@ -2,13 +2,18 @@
 
 set -e
 
-CONFIG_PATH=/config/telemt.toml
+CONFIG_PATH=/run/telemt/config.toml
 
 bashio::log.info "Generating Telemt configuration..."
 
-# Ensure config directory exists
-mkdir -p /config
-chmod 755 /config
+# Ensure /run/telemt directory exists (tmpfs should be mounted)
+if [[ ! -d /run/telemt ]]; then
+    bashio::log.info "Creating /run/telemt directory..."
+    mkdir -p /run/telemt 2>/dev/null || bashio::log.warning "Cannot create /run/telemt"
+fi
+
+# Ensure it's writable
+chmod 1777 /run/telemt 2>/dev/null || true
 
 # Read options
 SECRET=$(bashio::config 'secret')
@@ -29,7 +34,7 @@ if [[ ! "$SECRET" =~ ^[a-fA-F0-9]{32}$ ]]; then
     exit 1
 fi
 
-# Generate telemt.toml
+# Generate config.toml
 cat > "$CONFIG_PATH" <<EOF
 secret = "$SECRET"
 port = $PORT
@@ -48,50 +53,11 @@ bashio::log.info "Configuration written to $CONFIG_PATH"
 
 # Debug: check permissions and user
 bashio::log.info "Debug: running as user $(whoami)"
-bashio::log.info "Debug: /etc permissions: $(ls -ld /etc)"
-bashio::log.info "Debug: /etc/telemt/telemt.toml exists? $(ls -l /etc/telemt/telemt.toml 2>/dev/null || echo 'no')"
-bashio::log.info "Debug: /etc mount info: $(mount | grep ' /etc ' || echo 'not found')"
+bashio::log.info "Debug: /run/telemt permissions: $(ls -ld /run/telemt)"
+bashio::log.info "Debug: /run/telemt/config.toml permissions: $(ls -l /run/telemt/config.toml 2>/dev/null || echo 'no')"
 
-# Check if /etc is read-only
-if grep -q ' /etc .*ro,' /proc/mounts 2>/dev/null; then
-    bashio::log.warning "/etc is mounted read-only, attempting to remount rw..."
-    mount -o remount,rw /etc 2>/dev/null || bashio::log.error "Remount failed"
-fi
-
-# Ensure /etc/telemt directory exists (telemt may try to create it)
-if [[ ! -d /etc/telemt ]]; then
-    bashio::log.info "Creating /etc/telemt directory..."
-    mkdir -p /etc/telemt 2>/dev/null && chmod 777 /etc/telemt || bashio::log.warning "Cannot create /etc/telemt"
-fi
-
-# Copy config to both paths (not symlinks) to ensure telemt can write explicit config
-bashio::log.info "Copying config to /etc/telemt.toml and /etc/telemt/telemt.toml"
-cp "$CONFIG_PATH" /etc/telemt.toml 2>/dev/null || {
-    bashio::log.error "Failed to copy to /etc/telemt.toml, trying to create empty file..."
-    touch /etc/telemt.toml 2>/dev/null && chmod 666 /etc/telemt.toml
-}
-cp "$CONFIG_PATH" /etc/telemt/telemt.toml 2>/dev/null || {
-    bashio::log.error "Failed to copy to /etc/telemt/telemt.toml, trying to create empty file..."
-    touch /etc/telemt/telemt.toml 2>/dev/null && chmod 666 /etc/telemt/telemt.toml
-}
-
-# Ensure both files are writable
-chmod 666 /etc/telemt.toml 2>/dev/null || true
-chmod 666 /etc/telemt/telemt.toml 2>/dev/null || true
-
-bashio::log.info "Config copied, both paths ready"
-
-# Verify write access
-if [[ -w /etc/telemt.toml ]]; then
-    bashio::log.info "/etc/telemt.toml is writable"
-else
-    bashio::log.warning "/etc/telemt.toml is not writable, explicit config may fail"
-fi
-if [[ -w /etc/telemt/telemt.toml ]]; then
-    bashio::log.info "/etc/telemt/telemt.toml is writable"
-else
-    bashio::log.warning "/etc/telemt/telemt.toml is not writable"
-fi
+# Ensure config is readable (read-only for safety)
+chmod 644 "$CONFIG_PATH" 2>/dev/null || true
 
 bashio::log.info "Starting Telemt..."
 
@@ -102,4 +68,4 @@ export TELEMT_EXPLICIT_CONFIG=0
 export TELEMT_NO_EXPLICIT_CONFIG=1
 
 # Run telemt with the configuration file path (as per official Docker image)
-exec telemt /etc/telemt/telemt.toml
+exec telemt "$CONFIG_PATH"
