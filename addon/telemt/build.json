@@ -1,9 +1,7 @@
 {
   "build_from": {
-    "aarch64": "whn0thacked/telemt-docker:latest",
-    "amd64": "whn0thacked/telemt-docker:latest",
-    "armhf": "whn0thacked/telemt-docker:latest",
-    "armv7": "whn0thacked/telemt-docker:latest"
+    "aarch64": "ghcr.io/telemt/telemt:latest",
+    "amd64": "ghcr.io/telemt/telemt:latest"
   },
   "squash": false,
   "args": {}

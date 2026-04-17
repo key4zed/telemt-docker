@@ -25,7 +25,7 @@ tmpfs:
   - /etc
   - /run/telemt:rw,mode=1777,size=1m
 ports:
-  "4443/tcp": 8443
+  "443/tcp": 8443
   "9090/tcp": 9090
   "9091/tcp": 9091
 ports_description:
@@ -34,7 +34,7 @@ ports_description:
   "9091/tcp": "API endpoint"
 options:
   secret: ""
-  port: 8443
+  port: 443
   enable_metrics: true
   enable_api: true
   log_level: "info"
