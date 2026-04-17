@@ -25,11 +25,11 @@ tmpfs:
   - /etc
   - /run/telemt:rw,mode=1777,size=1m
 ports:
-  "443/tcp": 8443
+  "443/tcp": 4443
   "9090/tcp": 9090
   "9091/tcp": 9091
 ports_description:
-  "4443/tcp": "MTProxy listener"
+  "443/tcp": "MTProxy listener"
   "9090/tcp": "Metrics endpoint"
   "9091/tcp": "API endpoint"
 options:
